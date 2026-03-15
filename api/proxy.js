@@ -1,4 +1,4 @@
-jsmodule.exports = async (req, res) => {
+jsexport default async function handler(req, res) {
   const target = req.query.url;
   if (!target) return res.status(400).send('No URL provided');
 
@@ -22,4 +22,4 @@ jsmodule.exports = async (req, res) => {
   } catch (e) {
     res.status(500).send('Error: ' + e.message);
   }
-};
+}
