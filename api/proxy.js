@@ -1,6 +1,7 @@
 export default async function handler(req, res) {
-  const target = req.query.url;
+  let target = req.query.url;
   if (!target) return res.status(400).send('No URL provided');
+  if (!target.startsWith('http')) target = 'https://' + target;
 
   try {
     const response = await fetch(target, {
@@ -17,7 +18,6 @@ export default async function handler(req, res) {
     res.setHeader('Content-Type', contentType);
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('X-Frame-Options', 'ALLOWALL');
-
     res.send(body);
   } catch (e) {
     res.status(500).send('Error: ' + e.message);
