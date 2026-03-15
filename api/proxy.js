@@ -1,38 +1,25 @@
-jsconst https = require('https');
-const http = require('http');
-const { URL } = require('url');
-
-module.exports = async (req, res) => {
+jsmodule.exports = async (req, res) => {
   const target = req.query.url;
-  if (!target) return res.status(400).send('No URL');
+  if (!target) return res.status(400).send('No URL provided');
 
   try {
-    const url = new URL(target);
-    const lib = url.protocol === 'https:' ? https : http;
-
-    const options = {
-      hostname: url.hostname,
-      path: url.pathname + url.search,
-      method: 'GET',
+    const response = await fetch(target, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
         'Accept': 'text/html,application/xhtml+xml,*/*;q=0.8',
         'Accept-Language': 'ru-RU,ru;q=0.9',
       }
-    };
-
-    lib.get(options, (proxyRes) => {
-      const ct = proxyRes.headers['content-type'] || 'text/html';
-      res.setHeader('Content-Type', ct);
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.removeHeader('x-frame-options');
-      res.removeHeader('content-security-policy');
-      proxyRes.pipe(res);
-    }).on('error', (e) => {
-      res.status(500).send('Ошибка: ' + e.message);
     });
 
-  } catch(e) {
-    res.status(500).send('Ошибка: ' + e.message);
+    const contentType = response.headers.get('content-type') || 'text/html';
+    const body = await response.text();
+
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('X-Frame-Options', 'ALLOWALL');
+
+    res.send(body);
+  } catch (e) {
+    res.status(500).send('Error: ' + e.message);
   }
 };
